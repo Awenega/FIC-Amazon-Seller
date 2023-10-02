@@ -4,6 +4,7 @@ from PyPDF2 import PdfReader
 AMOUNT_CAPTION = ["TOTALES", "Totali", "GESAMT", "Total", "TOTALE", 'Totale fattura corrente in EUR', "TOTAL"]
 DATE_CAPTION = ["Fecha de la factura", "Rechnungsdatum", "Data fattura", "Fecha de emisión de la nota de crédito", "Ausstellungsdatum der Gutschrift", "Data emissione nota di credito"]
 NAME_CAPTION = ["Número de la factura", "Rechnungsnr", "Numero fattura:", "Número de nota de crédito", "Gutschriftennummer", "Numero nota di credito:"]
+PPC_CAPTION = ['ITAOIT3', 'ES-AOES']
 PATH = "fatture"
 
 def check_if_contain_caption(elem, type_caption):
@@ -78,6 +79,7 @@ def test_scrape_pdf():
             amount = get_amount(reader, is_ebay)
             date_raw = get_date(reader, is_ebay)
             nome_fattura = get_nome_fattura(reader, is_ebay)
-            print(f"{filename.name}: {nome_fattura} {date_raw} {amount}")
+            is_ppc = True if check_if_contain_caption(nome_fattura, PPC_CAPTION) else False
+            print(f"{filename.name}: {nome_fattura} {date_raw} {amount} {is_ppc}")
 
 test_scrape_pdf()
