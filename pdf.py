@@ -1,7 +1,7 @@
 import os
 from PyPDF2 import PdfReader
 
-AMOUNT_CAPTION = ["TOTALES", "Totali", "GESAMT", "Total", "TOTALE", 'Totale fattura corrente in EUR']
+AMOUNT_CAPTION = ["TOTALES", "Totali", "GESAMT", "Total", "TOTALE", 'Totale fattura corrente in EUR', "TOTAL"]
 DATE_CAPTION = ["Fecha de la factura", "Rechnungsdatum", "Data fattura", "Fecha de emisión de la nota de crédito", "Ausstellungsdatum der Gutschrift", "Data emissione nota di credito"]
 NAME_CAPTION = ["Número de la factura", "Rechnungsnr", "Numero fattura:", "Número de nota de crédito", "Gutschriftennummer", "Numero nota di credito:"]
 PATH = "fatture"
@@ -19,7 +19,7 @@ def get_amount(reader, is_ebay):
     if len(text) < 150 and not is_ebay:
         page = reader.pages[len(reader.pages)-2]
         text = page.extract_text()
-
+    
     elems = []
     for elem in text.split("\n"):
         if elem.replace(".", "").isnumeric() or check_if_contain_caption(elem, AMOUNT_CAPTION):
@@ -56,9 +56,13 @@ def get_nome_fattura(reader, is_ebay):
             if 'FNE' in elem:
                 return elem
             
-    for elem in text.split("\n"):
+    text_splitted = text.split("\n")
+    for elem in text_splitted:
         if check_if_contain_caption(elem, NAME_CAPTION):
-            return elem.split(": ")[1].strip()
+            try:
+                return elem.split(": ")[1].strip()
+            except IndexError:
+                return text_splitted[text_splitted.index(elem)+1]
 
 def check_if_ebay(reader):
     page = reader.pages[0]
@@ -75,3 +79,5 @@ def test_scrape_pdf():
             date_raw = get_date(reader, is_ebay)
             nome_fattura = get_nome_fattura(reader, is_ebay)
             print(f"{filename.name}: {nome_fattura} {date_raw} {amount}")
+
+test_scrape_pdf()
