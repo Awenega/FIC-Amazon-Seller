@@ -4,7 +4,6 @@ from PyPDF2 import PdfReader
 AMOUNT_CAPTION = ["TOTALES", "Totali", "GESAMT", "Total", "TOTALE", 'Totale fattura corrente in EUR', "TOTAL"]
 DATE_CAPTION = ["Fecha de la factura", "Rechnungsdatum", "Data fattura", "Fecha de emisión de la nota de crédito", "Ausstellungsdatum der Gutschrift", "Data emissione nota di credito"]
 NAME_CAPTION = ["Número de la factura", "Rechnungsnr", "Numero fattura:", "Número de nota de crédito", "Gutschriftennummer", "Numero nota di credito:"]
-PPC_CAPTION = ['ITAOIT3', 'ES-AOES']
 PATH = "fatture"
 
 def check_if_contain_caption(elem, type_caption):
@@ -43,7 +42,7 @@ def get_date(reader, is_ebay):
                 data = elem.replace("Numero della fattura","").split(" ")
                 mesi = {'gen': '01','feb': '02', 'mar': '03', 'apr': '04', 'mag': '05', 'giu': '06', 'lug': '07', 'ago': '08', 'set': '09', 'ott': '10', 'nov': '11', 'dic': '12'}
                 giorno, mese, anno = data[0], mesi[data[1]], data[2]
-                return f"{giorno}/{mese}/{anno}"
+                return f"{anno}-{mese}-{giorno}"
 
     for elem in text.split("\n"):
         if check_if_contain_caption(elem, DATE_CAPTION):
@@ -79,7 +78,4 @@ def test_scrape_pdf():
             amount = get_amount(reader, is_ebay)
             date_raw = get_date(reader, is_ebay)
             nome_fattura = get_nome_fattura(reader, is_ebay)
-            is_ppc = True if check_if_contain_caption(nome_fattura, PPC_CAPTION) else False
-            print(f"{filename.name}: {nome_fattura} {date_raw} {amount} {is_ppc}")
-
-test_scrape_pdf()
+            print(f"{filename.name}: {nome_fattura} {date_raw} {amount}")
