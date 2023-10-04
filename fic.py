@@ -13,26 +13,33 @@ def load_credentials():
         print(f"Error decoding JSON in credentials.json")
         return None
 
-def get_supplier(credentials, supplier_id):
-  headers = {'Authorization': f'Bearer {credentials.get("token")}', 
-            'accept': 'application/json',
-            'content-type': 'application/json'}
-  url = 'https://api-v2.fattureincloud.it'
-  path = f'/c/{credentials.get("company_id")}/entities/suppliers/{credentials.get(supplier_id)}'
-  response = requests.get(url+path, headers=headers).json()
-  return response
-
-def create_invoice(is_ebay, name, date):
-    credentials = load_credentials()
-    
+def get_supplier(credentials, is_ebay, name):
+  
     if is_ebay:
-        supplier_entity = get_supplier(credentials, "EBAY_SUPPLIER_ID")
-    elif 'ITAOIT3' in name:
-        supplier_entity = get_supplier(credentials, "PPC_IT_SUPPLIER_ID")
+        supplier_id = credentials.get("EBAY_SUPPLIER_ID")
     elif 'ES-AOES' in name:
-        supplier_entity = get_supplier(credentials, "PPC_ES_SUPPLIER_ID")
+        supplier_id = credentials.get("PPC_ES_SUPPLIER_ID")
     else:
-        supplier_entity = get_supplier(credentials, "DEFAULT_SUPPLIER_ID")
+        supplier_id = credentials.get("DEFAULT_SUPPLIER_ID")
+
+    headers = {'Authorization': f'Bearer {credentials.get("token")}', 
+                'accept': 'application/json',
+                'content-type': 'application/json'}
+    url = 'https://api-v2.fattureincloud.it'
+    path = f'/c/{credentials.get("company_id")}/entities/suppliers/{supplier_id}'
+    response = requests.get(url+path, headers=headers).json()
+    response['data']['ei_code'] = credentials.get("CODICE_DESTINATARIO")
+    return response['data']
+
+def get_visible_subject(is_ebay, name):
+    if is_ebay:
+        return 'Commissioni Ebay'
+    elif 'ES-AOES' in name:
+        return 'Amazon Marketing Commissioni'
+    else:
+        return 'Commissioni Amazon'
+
+def create_invoice(credentials, supplier_entity, visible_subject, name, amount, date, item_description):  
 
     headers = {'Authorization': f'Bearer {credentials.get("token")}', 
                 'accept': 'application/json',
@@ -43,10 +50,9 @@ def create_invoice(is_ebay, name, date):
     body = {
       "data": {
             "type": "self_supplier_invoice",
-            "entity": supplier_entity['data'],
-            "date": date,
+            "entity": supplier_entity,
             "numeration": "AF",
-            "visible_subject": "Commissioni Amazon",
+            "visible_subject": visible_subject,
             "currency": {
                 "id": "EUR",
                 "exchange_rate": "1.00000",
@@ -58,8 +64,8 @@ def create_invoice(is_ebay, name, date):
             },
             "items_list": [
             {
-                "name": "Commissioni del venditore",
-                "net_price": 10,
+                "name": item_description,
+                "net_price": amount,
                 "qty": 1,
                 "vat": {
                     "id": 0, #22%
@@ -67,9 +73,9 @@ def create_invoice(is_ebay, name, date):
             }],
             "payments_list": [
             {
-                "amount": 12.20,
-                "due_date": "2022-09-23",
-                "paid_date": "2022-09-23",
+                "amount": round(amount*1.22,2),
+                "due_date": date,
+                "paid_date": date,
                 "status": "paid",
                 "payment_account": {
                     "id": credentials.get("AMAZON_PAYMENT_ACCOUNT_ID")
@@ -81,13 +87,24 @@ def create_invoice(is_ebay, name, date):
             },
             "e_invoice": True,
             "ei_data": {
-                "payment_method": "MP16"
+                "payment_method": "MP16",
             },
             "ei_raw": {
+                "FatturaElettronicaHeader": {
+                    "CedentePrestatore": {
+                        "DatiAnagrafici": {
+                            "RegimeFiscale": "RF18"
+                        }
+                    },
+                },
                 "FatturaElettronicaBody": {
                     "DatiGenerali": {
                         "DatiGeneraliDocumento": {
                             "TipoDocumento": "TD17"
+                        },
+                        "DatiFattureCollegate":{
+                            "IdDocumento": name,
+                            "Data": date
                         }
                     },
                 }
@@ -99,4 +116,3 @@ def create_invoice(is_ebay, name, date):
     response = requests.post(url+path, headers=headers, data=request_parameters).json()
     return response
 
-create_invoice(False, "", "2023-10-01")
