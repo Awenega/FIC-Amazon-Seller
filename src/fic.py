@@ -115,4 +115,3 @@ def create_invoice(credentials, supplier_entity, visible_subject, name, amount, 
     request_parameters = json.dumps(body)
     response = requests.post(url+path, headers=headers, data=request_parameters).json()
     return response
-
