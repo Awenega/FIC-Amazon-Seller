@@ -37,6 +37,14 @@ def get_amount(reader, is_ebay):
     for elem in text.split("\n"):
         if elem.replace(".", "").isnumeric() or check_if_contain_caption(elem, AMOUNT_CAPTION):
             elems.append(elem)
+    
+    if len(elems) <= 0 and not is_ebay:
+        page = reader.pages[len(reader.pages)-2]
+        text = page.extract_text()
+        for elem in text.split("\n"):
+            if elem.replace(".", "").isnumeric() or check_if_contain_caption(elem, AMOUNT_CAPTION):
+                elems.append(elem)
+
 
     tmp = elems[len(elems)-1].split(" ")
     if is_ebay:
