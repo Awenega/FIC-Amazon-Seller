@@ -1,6 +1,7 @@
 import os
 from pdf import get_info_invoice
 from fic import load_credentials, get_supplier, get_visible_subject, create_invoice
+from getch import pause
 
 PATH = "fatture"
 
@@ -13,6 +14,7 @@ def main():
         visible_subject = get_visible_subject(is_ebay, name)
 
         create_invoice(credentials, supplier_entity, visible_subject, name, amount, date, item_description)
+    pause('Press Any Key To Exit')
 
 if __name__ == "__main__":
     main()

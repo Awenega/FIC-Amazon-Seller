@@ -82,7 +82,10 @@ def get_nome_fattura(reader, is_ebay):
     for elem in text_splitted:
         if check_if_contain_caption(elem, NAME_CAPTION):
             try:
-                return elem.split(": ")[1].strip()
+                ret = elem.split(": ")[1].strip()
+                if '-CN' in ret:
+                    return ret.replace("-CN", "")
+                return ret
             except IndexError:
                 return text_splitted[text_splitted.index(elem)+1]
 

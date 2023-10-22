@@ -5,7 +5,7 @@ Self-Invoice generator that from an Amazon invoice creates a self-invoice on the
 Every month, an Amazon Seller receives dozens of invoices related to amazon commissions (such as logistics, vendor and advertising). 
 Italian taxation requires issuing a self-invoice for most invoices received from Amazon. 
 As a result, having to tabulate a multitude of invoices each month is a tedious and time consuming process.
-Through this tool, you can create all the self-bills for the month in seconds.
+Through this tool, you can create all the self-invoice for the month in seconds.
 
 # 💻How to use
 1. Fill in the credentials.json file with your Fatture in Cloud credentials 
@@ -13,3 +13,4 @@ Through this tool, you can create all the self-bills for the month in seconds.
 3. Create the folder **fatture**
 4. Insert all the invoice you want to process in the previous folder
 5. Run the script
+6. If you want to create a .exe file, run 'pyinstaller -F main.py' in your cmd (windows)
