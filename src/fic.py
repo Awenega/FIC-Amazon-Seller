@@ -1,5 +1,6 @@
 import requests
 import json
+from math import ceil
 
 def load_credentials():
     try:
@@ -73,7 +74,7 @@ def create_invoice(credentials, supplier_entity, visible_subject, name, amount, 
             }],
             "payments_list": [
             {
-                "amount": round(amount*1.22,2),
+                "amount": ceil(amount * 122) / 100,
                 "due_date": date,
                 "paid_date": date,
                 "status": "paid",
