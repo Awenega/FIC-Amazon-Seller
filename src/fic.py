@@ -1,5 +1,6 @@
 import requests
 import json
+import time
 from math import ceil
 
 def load_credentials():
@@ -40,15 +41,25 @@ def get_visible_subject(is_ebay, name):
     else:
         return 'Commissioni Amazon'
 
-def create_invoice(credentials, supplier_entity, visible_subject, name, amount, date, item_description):  
+def get_total_amount(credentials, invoice):
+    headers = {'Authorization': f'Bearer {credentials.get("token")}', 
+                'accept': 'application/json',
+                'content-type': 'application/json'}
+    url = 'https://api-v2.fattureincloud.it'
+    path = f'/c/{credentials.get("company_id")}/issued_documents/totals'
 
+    request_parameters = json.dumps(invoice)
+    response = requests.post(url+path, headers=headers, data=request_parameters).json()
+    return response['data']['amount_gross']
+
+def create_invoice(credentials, supplier_entity, visible_subject, name, amount, date, item_description):  
     headers = {'Authorization': f'Bearer {credentials.get("token")}', 
                 'accept': 'application/json',
                 'content-type': 'application/json'}
     url = 'https://api-v2.fattureincloud.it'
     path = f'/c/{credentials.get("company_id")}/issued_documents'
     
-    body = {
+    invoice = {
       "data": {
             "type": "self_supplier_invoice",
             "entity": supplier_entity,
@@ -113,6 +124,11 @@ def create_invoice(credentials, supplier_entity, visible_subject, name, amount, 
         }
     }
 
-    request_parameters = json.dumps(body)
+    total_amount = get_total_amount(credentials, invoice)
+    invoice['data']['payments_list'][0]['amount'] = total_amount
+
+    time.sleep(0.5)
+
+    request_parameters = json.dumps(invoice)
     response = requests.post(url+path, headers=headers, data=request_parameters).json()
     return response

@@ -84,7 +84,7 @@ def get_nome_fattura(reader, is_ebay):
             try:
                 ret = elem.split(": ")[1].strip()
                 if '-CN' in ret:
-                    return ret.replace("-CN", "")
+                    return ret.replace("LU-", "")
                 return ret
             except IndexError:
                 return text_splitted[text_splitted.index(elem)+1]
